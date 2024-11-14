@@ -3,7 +3,7 @@ from pymongo.errors import ConnectionFailure
 
 class ConectionDb:
     def __init__(self):
-        self.client = MongoClient("mongodb://localhost:27018/", serverSelectionTimeoutMS=5000)
+        self.client = MongoClient("mongodb://localhost:27017/", serverSelectionTimeoutMS=5000)
         self.db = self.client["SmartPark"]
         self.collection = self.db["Estaciones"]
 
