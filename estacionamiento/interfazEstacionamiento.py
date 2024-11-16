@@ -7,7 +7,7 @@ from conectToDb import ConectionDb
 
 
 class interfazEstacionamiento:
-    def __init__(self, estacionamiento):
+    def __init__(self):
         self.sensores = Sensor()
         self.estacionamientos = Estacionamiento()
         self.estacionamientos.leer_doc()
@@ -32,25 +32,25 @@ class interfazEstacionamiento:
 
     def crear_estacionamiento(self):
         print("Crear estacionamiento")
-        noEs = input("Numero de estacionamiento: ")
         nombre = input("Nombre del estacionamiento: ")
         ubicacion = input("Ubicacion del estacionamiento: ")
-        print(noEs, nombre, ubicacion)
+        print(nombre, ubicacion)
         res = input("¿Desea finalizar el registro del grupo? Escriba el numero que desea \n 1.Si \n 2.No \n ")
 
         if res == "1":
             #guardar el object id del estacionamiento que se cree como una propiedad que al cabo solo se usara 1 estacionamiento siempre
-            id_object = ObjectId()
-            estacionamiento = Estacionamiento(noEs, nombre, ubicacion)
+            estacionamiento = Estacionamiento("", nombre, ubicacion)
             print(estacionamiento)
             print("Estacionamiento creado exitosamente")
 
             if self.db.conectar_mongo():
-                self.updateDb()
+                # self.updateDb()
                 id_object = self.db.create(estacionamiento.dict(), 1)
+                estacionamiento.noEs = str(id_object)
+                self.estacionamientos.agregar(estacionamiento)
+                self.estacionamientos.document(self.estacionamientos.dict())
             else:
-                print(
-                    "Actualmente no hay conexion con la BD. \nLa informacion creada sera guardada localmente hasta que se pueda establecer nuevamente comunicacion con la BD")
+                print("Actualmente no hay conexion con la BD. \nLa informacion creada sera guardada localmente hasta que se pueda establecer nuevamente comunicacion con la BD")
                 self.estacionamientos.agregar(estacionamiento)
                 self.estacionamientos.document(self.estacionamientos.dict())
 
@@ -64,3 +64,7 @@ class interfazEstacionamiento:
 
     def editar_estacionamiento(self):
         print("editar")
+
+
+if __name__ == "__main__":
+    interfazEstacionamiento().menu()

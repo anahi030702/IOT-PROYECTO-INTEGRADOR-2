@@ -6,18 +6,20 @@ from sensor import Sensor
 import serial
 import time
 import json
+from bson import ObjectId
+
 
 from conectToDb import ConectionDb
 
 
 class puertoSerial:
     def __init__(self):
-        self.port = 'COM7'
+        self.port = 'COM3'
         self.baudrate = 9600
         self.timeout = 0
-        self.sensores = []
-        self.accesos = []
         self.est = Estacionamiento()
+        self.est.leer_doc()
+        self.db = ConectionDb()
 
     def leer_puerto(self):
         # Inicializa la conexión serial
@@ -33,7 +35,8 @@ class puertoSerial:
                     fecha = datetime.now().strftime('%d-%m-%Y %H:%M:%S')
                     parts = line.split(':')
                     sensor = Sensor(parts[0], parts[1], fecha)
-                    self.est.actualizarSensores(sensor.dict())
+                    self.mandarInfoLocal()
+                    self.actualizarSensores(sensor)
 
 
 
@@ -42,9 +45,29 @@ class puertoSerial:
             print("Lectura interrumpida.")
 
         finally:
-            ser.close()  # Cierra el puerto serial al finalizar
+            ser.close()
 
 
+    def actualizarSensores(self, data):
+        if self.db.conectar_mongo():
+            res = self.db.updateone({"_id": ObjectId(self.est[0].noEs)}, {"$push" : {"sensores": data.dict()}})
+            print(res)
+        else:
+            self.est[0].sensores.agregar(data)
+            self.est.document(self.est.dict())
+            print("Valor guardado localmente")
+
+    def mandarInfoLocal(self):
+        if self.db.conectar_mongo() and self.est[0].sensores:
+            for sensor in self.est[0].sensores:
+                print(sensor.dict())
+                res = self.db.updateone({"_id": ObjectId(self.est[0].noEs)}, {"$push" : {"sensores": sensor.dict()}})
+                print(res)
+
+            self.est[0].sensores = Sensor()
+            self.est.document(self.est.dict())
+        else:
+            print("no hay informacion de sensores para subir")
 
 
 

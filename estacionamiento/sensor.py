@@ -31,16 +31,8 @@ class Sensor(Arreglo):
         sensores = []
 
         for doc in data:
-            sensor = Sensor(doc["tipo"], doc["valor"], doc["fecha"], doc["estacionamiento"])
+            sensor = Sensor(doc["tipo"], doc["valor"], doc["fecha"])
             sensores.append(sensor)
         self.arreglos = sensores
         return sensores
 
-
-if __name__ == "__main__":
-    ses = Sensor()
-    se = Sensor("mq2", 45, "25/11/2024", "654156465")
-    se1 = Sensor("mq2", 45, "25/11/2024", "654156465")
-    ses.agregar(se)
-    ses.agregar(se1)
-    print(ses.dict())

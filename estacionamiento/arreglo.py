@@ -10,7 +10,7 @@ class Arreglo:
         # return json.dumps(self.arreglos, indent=4)
 
     # Métodos para cuando funciona como arreglo
-    # regresa el valor que se encuentra en el indice especificado
+    # regresa el valor que se encuentra en el indices especificado
     def __getitem__(self, index):
         return self.arreglos[index]
 
@@ -36,21 +36,6 @@ class Arreglo:
         except ValueError:
             return -1  # Devuelve -1 si el valor no se encuentra
 
-    # def document(self, tipo, data):
-    #         json_object = json.dumps(data, indent=4)
-    #
-    #         with open(f"{tipo}.json", "w") as outfile:
-    #             outfile.write(json_object)
-    #         return "ok"
+    def vaciar(self):
+        self.arreglos.clear()
 
-
-
-# #otras maneras de usar los metodos magicos
-# #metodo __len__
-# len(arreglo)
-# #metodo __getitem__
-# arreglo[0]
-# #metodo __setitem__
-# arreglo[0] = Alumno("Alberto", "Gonzalez", "Contreras", "AGCO050906MCLLLN04", "2252930")
-# #metodo __delitem
-# del arreglo[0]

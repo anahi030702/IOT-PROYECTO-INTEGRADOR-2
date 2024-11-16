@@ -4,12 +4,11 @@ from sensor import Sensor
 from arreglo import Arreglo
 from conectToDb import ConectionDb
 import json
-from bson import ObjectId
 
 class Estacionamiento(Arreglo):
-    def __init__(self, noEs=None, nombre=None, ubicacion=None):
+    def __init__(self,noEs=None, nombre=None, ubicacion=None):
         if nombre is not None:
-            self.noEs = noEs
+            self.noEs = "" or noEs
             self.nombre = nombre
             self.ubicacion = ubicacion
             self.sensores = Sensor()
@@ -58,24 +57,10 @@ class Estacionamiento(Arreglo):
         self.arreglos = estacionamientos
         return estacionamientos
 
-    #hacer que los sensores que se le manden se actualicen en mongo o en el archivo json segun la conectividad con mongo
-    def actualizarSensores(self, data):
-        db = ConectionDb()
-        if db.conectar_mongo():
-            res = db.updateone({"_id": ObjectId("6728053923ad77d8021b8337")}, {"$push" : {"sensores": data}})
-            print(res)
 
 
 
 
-
-if __name__ == "__main__":
-    estas = Estacionamiento()
-    estas.leer_doc()
-    esta = estas[0]
-    se = Sensor("mq1", 45, "15/25/2024", 1)
-    esta.sensores.agregar(se)
-    print(esta)
 
 
 
