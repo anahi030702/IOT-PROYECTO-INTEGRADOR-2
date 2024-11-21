@@ -1,5 +1,5 @@
 
- 
+
 void activarBuzzer(){
   digitalWrite(9, HIGH);   
   Serial.println("Encendido");
