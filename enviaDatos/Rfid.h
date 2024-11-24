@@ -33,58 +33,37 @@
 #include <SPI.h>
 #include <MFRC522.h>
 
-#define SS_PIN 10
-#define RST_PIN 9
- 
-// Init array that will store new NUID 
-byte nuidPICC[4];
- 
-void leerRfid(MFRC522 &rfid) {
+#define RST_PIN 9  // Configurable
+#define SS_PIN 10  // Configurable
 
-  // Reinicia el bucle si no hay una nueva tarjeta presente en el lector
-  if ( ! rfid.PICC_IsNewCardPresent())
-    return;
+MFRC522 mfrc522(SS_PIN, RST_PIN);  // Crear instancia MFRC522
 
-  // Verifica si el NUID ha sido leído
-  if ( ! rfid.PICC_ReadCardSerial())
-    return;
-
-  // Chequea si la tarjeta es del tipo MIFARE Classic
-  MFRC522::PICC_Type piccType = rfid.PICC_GetType(rfid.uid.sak);
-  if (piccType != MFRC522::PICC_TYPE_MIFARE_MINI &&  
-      piccType != MFRC522::PICC_TYPE_MIFARE_1K &&
-      piccType != MFRC522::PICC_TYPE_MIFARE_4K) {
-    Serial.println(F("Your tag is not of type MIFARE Classic."));
-    return;
-  }
-
-  // Verifica si la tarjeta es nueva
-  if (rfid.uid.uidByte[0] != nuidPICC[0] || 
-      rfid.uid.uidByte[1] != nuidPICC[1] || 
-      rfid.uid.uidByte[2] != nuidPICC[2] || 
-      rfid.uid.uidByte[3] != nuidPICC[3]) {
-    Serial.println(F("A new card has been detected."));
-
-    // Guarda el NUID en el array nuidPICC
-    for (byte i = 0; i < 4; i++) {
-      nuidPICC[i] = rfid.uid.uidByte[i];
-    }
-   
-    Serial.println(F("The raw NUID tag is:"));
-    
-    // Imprime el ID de la tarjeta en su formato crudo
-    for (byte i = 0; i < rfid.uid.size; i++) {
-      Serial.print(rfid.uid.uidByte[i]);
-      Serial.print(" ");
-    }
-    Serial.println();
-  } else {
-    Serial.println(F("Card read previously."));
-  }
-
-  // Halt PICC
-  rfid.PICC_HaltA();
-
-  // Stop encryption on PCD
-  rfid.PCD_StopCrypto1();
+void inicializarSensorRfid() {
+  SPI.begin();         // Iniciar bus SPI
+  mfrc522.PCD_Init();  // Inicializar el lector RFID
+  Serial.println(F("Acerque una tarjeta para leer el UID..."));
 }
+
+void leerRfid() {
+  // Verificar si hay una nueva tarjeta
+  if (!mfrc522.PICC_IsNewCardPresent()) {
+    return;
+  }
+
+  // Intentar leer la tarjeta
+  if (!mfrc522.PICC_ReadCardSerial()) {
+    return;
+  }
+
+  // Imprimir UID
+  Serial.print(F("UID: "));
+  for (byte i = 0; i < mfrc522.uid.size; i++) {
+    Serial.print(mfrc522.uid.uidByte[i] < 0x10 ? "0" : ""); // Añadir 0 si es menor a 16
+    Serial.print(mfrc522.uid.uidByte[i], HEX);  // Imprimir en hexadecimal
+  }
+  Serial.println();
+
+  // Detener comunicación con la tarjeta
+  mfrc522.PICC_HaltA();
+}
+
