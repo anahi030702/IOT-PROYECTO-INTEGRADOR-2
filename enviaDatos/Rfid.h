@@ -32,19 +32,51 @@
 
 #include <SPI.h>
 #include <MFRC522.h>
+#include "Servo1.h"
+#include "pantalla.h"
 
 #define RST_PIN 9  // Configurable
 #define SS_PIN 10  // Configurable
 
+int inicio = 0;
+int indice = 0;
+int bandera = 0;
+
+
 MFRC522 mfrc522(SS_PIN, RST_PIN);  // Crear instancia MFRC522
 
-void inicializarSensorRfid() {
-  SPI.begin();         // Iniciar bus SPI
-  mfrc522.PCD_Init();  // Inicializar el lector RFID
-  Serial.println(F("Acerque una tarjeta para leer el UID..."));
+void setupSensorRfid() {
+  SPI.begin();         
+  mfrc522.PCD_Init();  
+  setupLcd();
+  setupServo();
 }
 
-void leerRfid() {
+void checkArray(String rfid, String cadena){
+  inicio = 0;  
+  bandera = 0; 
+  cadena.trim();
+  rfid.trim();
+  while ((indice = cadena.indexOf(',', inicio)) != -1) {
+    String palabra = cadena.substring(inicio, indice); // Extraer la palabra
+    palabra.trim();
+    if (palabra == rfid){
+      Serial.println(palabra);
+      mostrarInfo("Acceso", "Autorizado");
+      levantarServo();
+      bajarServo();
+      bandera = 1;
+      break;
+    }
+    inicio = indice + 1; // Mover el inicio al siguiente segmento
+  }
+
+  if (bandera == 0){
+      mostrarInfo("Acceso", "Denegado");
+  }
+}
+
+void leerRfid(String cadena) {  
   // Verificar si hay una nueva tarjeta
   if (!mfrc522.PICC_IsNewCardPresent()) {
     return;
@@ -55,15 +87,20 @@ void leerRfid() {
     return;
   }
 
-  // Imprimir UID
-  Serial.print(F("UID: "));
+  // Crear una cadena para almacenar el UID completo
+  String uid = "";
   for (byte i = 0; i < mfrc522.uid.size; i++) {
-    Serial.print(mfrc522.uid.uidByte[i] < 0x10 ? "0" : ""); // Añadir 0 si es menor a 16
-    Serial.print(mfrc522.uid.uidByte[i], HEX);  // Imprimir en hexadecimal
+    if (mfrc522.uid.uidByte[i] < 0x10) {
+      uid += "0";  // Añadir un cero si es menor a 16
+    }
+    uid += String(mfrc522.uid.uidByte[i], HEX);  // Concatenar en hexadecimal
   }
-  Serial.println();
 
+  checkArray(uid, cadena);  
+  
   // Detener comunicación con la tarjeta
   mfrc522.PICC_HaltA();
 }
+
+
 
