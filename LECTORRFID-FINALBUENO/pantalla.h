@@ -20,7 +20,7 @@ void setupLcd(){
 
 void mostrarInfo(String renglon1, String renglon2)
 {
-  lcd.clear();  
+  lcd.clear();
   lcd.setCursor(0,0);
   lcd.print(renglon1);
   lcd.setCursor(0,1);
@@ -29,4 +29,3 @@ void mostrarInfo(String renglon1, String renglon2)
   lcd.clear();
   bienvenida();
 }
-
